@@ -100,13 +100,17 @@ hf_hub_download(
 
 **Option B: Train Your Own Models**
 
-```python
-from stable_baselines3 import PPO
-from gymnasium import Env
-
-# Train custom RL agent
-# (See training script for details)
+```bash
+# Edit backend/training/training_config.yaml to list the tickers for each model
+# Then launch the trainer (downloads data from Yahoo Finance automatically)
+python -m backend.training.train_models --config backend/training/training_config.yaml
 ```
+
+The YAML file ships with sample `tech`, `energy`, and `finance` model
+definitions.  You can freely add new models or adjust the ticker lists, PPO
+hyperparameters, training horizon, or output paths.  Each model saves its
+trained weights and feature scaler into `backend/models/` by default, keeping
+them ready for the backend server to load.
 
 ### 4. Get Alpaca API Keys
 

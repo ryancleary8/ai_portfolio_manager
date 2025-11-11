@@ -1,0 +1,28 @@
+# Default settings apply to every model unless overridden.
+defaults:
+  history_period: "2y"
+  min_history: 252         # ~1 trading year of data
+  total_timesteps: 200000
+  output_dir: backend/models
+  ppo_params:
+    n_steps: 512
+    batch_size: 128
+    ent_coef: 0.01
+    learning_rate: 0.0003
+
+models:
+  tech:
+    tickers: [AAPL, MSFT, NVDA, GOOGL]
+    total_timesteps: 300000
+    model_filename: tech_model.zip
+    scaler_filename: tech_scaler.pkl
+
+  energy:
+    tickers: [XOM, CVX, COP]
+    history_period: "3y"
+    model_filename: energy_model.zip
+    scaler_filename: energy_scaler.pkl
+
+  finance:
+    tickers: [JPM, BAC, GS]
+    # inherits defaults

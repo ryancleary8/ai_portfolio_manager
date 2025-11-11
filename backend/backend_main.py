@@ -62,17 +62,35 @@ def load_models():
         if os.path.exists("models/tech_model.zip"):
             MODELS["tech"] = PPO.load("models/tech_model.zip")
             logger.info("✅ Loaded tech_model.zip")
-        
+
         # Load energy model
         if os.path.exists("models/energy_model.zip"):
             MODELS["energy"] = PPO.load("models/energy_model.zip")
             logger.info("✅ Loaded energy_model.zip")
-        
-        # Load scalers
+
+        # Load finance model (optional custom model)
+        if os.path.exists("models/finance_model.zip"):
+            MODELS["finance"] = PPO.load("models/finance_model.zip")
+            logger.info("✅ Loaded finance_model.zip")
+
+        # Load scalers (model-specific overrides fall back to the shared scaler)
+        if os.path.exists("models/tech_scaler.pkl"):
+            SCALERS["tech"] = joblib.load("models/tech_scaler.pkl")
+            logger.info("✅ Loaded tech_scaler.pkl")
+
+        if os.path.exists("models/energy_scaler.pkl"):
+            SCALERS["energy"] = joblib.load("models/energy_scaler.pkl")
+            logger.info("✅ Loaded energy_scaler.pkl")
+
+        if os.path.exists("models/finance_scaler.pkl"):
+            SCALERS["finance"] = joblib.load("models/finance_scaler.pkl")
+            logger.info("✅ Loaded finance_scaler.pkl")
+
         if os.path.exists("models/scaler.pkl"):
-            SCALERS["tech"] = joblib.load("models/scaler.pkl")
-            SCALERS["energy"] = joblib.load("models/scaler.pkl")
-            logger.info("✅ Loaded scaler.pkl")
+            shared_scaler = joblib.load("models/scaler.pkl")
+            SCALERS.setdefault("tech", shared_scaler)
+            SCALERS.setdefault("energy", shared_scaler)
+            logger.info("✅ Loaded shared scaler.pkl")
         
         return True
     except Exception as e:

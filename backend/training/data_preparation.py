@@ -54,10 +54,21 @@ class TickerDataset:
         return self.features.shape[1]
 
 
-def download_ticker_history(ticker: str, *, period: str) -> Optional[pd.DataFrame]:
+def download_ticker_history(
+    ticker: str,
+    *,
+    period: str,
+    source: str = "auto",
+    local_data_dir: Optional[str] = "data/historical",
+) -> Optional[pd.DataFrame]:
     """Download historical OHLCV data for a ticker."""
 
-    raw_df = get_historical_data(ticker, period=period)
+    raw_df = get_historical_data(
+        ticker,
+        period=period,
+        source=source,
+        local_data_dir=local_data_dir,
+    )
     if raw_df is None or raw_df.empty:
         return None
 
@@ -87,6 +98,8 @@ def build_datasets(
     *,
     period: str,
     min_history: int = 100,
+    source: str = "auto",
+    local_data_dir: Optional[str] = "data/historical",
 ) -> Tuple[List[TickerDataset], StandardScaler]:
     """Download market data and return scaled datasets for each ticker."""
 
@@ -94,7 +107,12 @@ def build_datasets(
     all_features: List[np.ndarray] = []
 
     for ticker in tickers:
-        df = download_ticker_history(ticker, period=period)
+        df = download_ticker_history(
+            ticker,
+            period=period,
+            source=source,
+            local_data_dir=local_data_dir,
+        )
         if df is None:
             continue
 

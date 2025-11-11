@@ -2,6 +2,8 @@
 defaults:
   history_period: "2y"
   min_history: 252         # ~1 trading year of data
+  data_source: local        # auto, local, or yfinance
+  local_data_dir: data/historical
   total_timesteps: 200000
   output_dir: backend/models
   ppo_params:

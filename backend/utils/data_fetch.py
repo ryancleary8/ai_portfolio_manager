@@ -1,13 +1,15 @@
-"""
-Market Data Fetching
-Retrieves historical and real-time data from Yahoo Finance and Alpaca
+"""Market Data Fetching utilities.
+
+Retrieves historical and real-time data from Yahoo Finance and Alpaca.
 """
 
-import yfinance as yf
-import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 import logging
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional
+
+import pandas as pd
+import yfinance as yf
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,87 @@ def fetch_market_data(tickers: List[str], days: int = 60) -> Dict[str, pd.DataFr
     return market_data
 
 
-def get_historical_data(ticker: str, period: str = "1y") -> Optional[pd.DataFrame]:
+def _normalise_ohlcv_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a copy of *df* with normalised column naming conventions."""
+
+    normalised = df.copy()
+    normalised.columns = [col.lower() for col in normalised.columns]
+
+    # Harmonise the primary date column name if it exists under different aliases.
+    if "date" not in normalised.columns:
+        for candidate in ("datetime", "index", "timestamp"):
+            if candidate in normalised.columns:
+                normalised = normalised.rename(columns={candidate: "date"})
+                break
+
+    return normalised
+
+
+def load_local_historical_data(
+    ticker: str,
+    *,
+    directory: str = "data/historical",
+) -> Optional[pd.DataFrame]:
+    """Attempt to load historical OHLCV data for *ticker* from CSV files.
+
+    The loader supports two filename conventions:
+
+    * ``{ticker}.csv`` (case-insensitive)
+    * ``{ticker}_YYYYMMDD.csv`` — the most recent file is selected automatically.
+
+    Args:
+        ticker: Stock symbol to search for.
+        directory: Directory containing historical CSV files.
+
+    Returns:
+        DataFrame with standardised column names if a file is located, otherwise
+        ``None``.
+    """
+
+    base_path = Path(directory)
+    if not base_path.exists():
+        return None
+
+    possible_filenames: Iterable[Path] = (
+        base_path / f"{ticker}.csv",
+        base_path / f"{ticker.lower()}.csv",
+        base_path / f"{ticker.upper()}.csv",
+    )
+
+    for candidate in possible_filenames:
+        if candidate.exists():
+            try:
+                df = pd.read_csv(candidate)
+                logger.info("✅ Loaded %s data from %s", ticker, candidate)
+                return _normalise_ohlcv_columns(df)
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.error("❌ Error reading %s: %s", candidate, exc)
+                return None
+
+    matching_files: List[Path] = []
+    for pattern in (f"{ticker}_*.csv", f"{ticker.lower()}_*.csv", f"{ticker.upper()}_*.csv"):
+        matching_files.extend(sorted(base_path.glob(pattern)))
+
+    matching_files.sort()
+    if matching_files:
+        latest_file = matching_files[-1]
+        try:
+            df = pd.read_csv(latest_file)
+            logger.info("✅ Loaded %s data from %s", ticker, latest_file)
+            return _normalise_ohlcv_columns(df)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.error("❌ Error reading %s: %s", latest_file, exc)
+
+    return None
+
+
+def get_historical_data(
+    ticker: str,
+    period: str = "1y",
+    *,
+    source: str = "auto",
+    local_data_dir: Optional[str] = "data/historical",
+) -> Optional[pd.DataFrame]:
     """
     Get historical data for a single ticker
     
@@ -71,23 +153,39 @@ def get_historical_data(ticker: str, period: str = "1y") -> Optional[pd.DataFram
     Returns:
         DataFrame with OHLCV data
     """
-    try:
-        stock = yf.Ticker(ticker)
-        df = stock.history(period=period)
-        
-        if df.empty:
-            logger.warning(f"⚠️ No historical data for {ticker}")
+    source_normalised = source.lower()
+
+    if source_normalised not in {"auto", "local", "yfinance"}:
+        raise ValueError(
+            "source must be one of {'auto', 'local', 'yfinance'}; "
+            f"received {source!r}"
+        )
+
+    if source_normalised in {"auto", "local"} and local_data_dir is not None:
+        local_df = load_local_historical_data(ticker, directory=local_data_dir)
+        if local_df is not None:
+            return local_df
+        if source_normalised == "local":
+            logger.warning("⚠️ No local data found for %s in %s", ticker, local_data_dir)
             return None
-        
-        # Clean column names
-        df.columns = [col.lower() for col in df.columns]
-        df = df.reset_index()
-        
-        return df
-        
-    except Exception as e:
-        logger.error(f"❌ Error getting historical data for {ticker}: {e}")
-        return None
+
+    if source_normalised in {"auto", "yfinance"}:
+        try:
+            stock = yf.Ticker(ticker)
+            df = stock.history(period=period)
+
+            if df.empty:
+                logger.warning(f"⚠️ No historical data for {ticker}")
+                return None
+
+            df = df.reset_index()
+            return _normalise_ohlcv_columns(df)
+
+        except Exception as e:  # pragma: no cover - fallback protection
+            logger.error(f"❌ Error getting historical data for {ticker}: {e}")
+            return None
+
+    return None
 
 
 def get_latest_price(ticker: str) -> Optional[float]:

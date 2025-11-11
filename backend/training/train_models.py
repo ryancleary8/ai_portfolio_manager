@@ -96,6 +96,11 @@ def train_single_model(
     tickers = model_cfg["tickers"]
     history_period = model_cfg.get("history_period", defaults.get("history_period", "2y"))
     min_history = int(model_cfg.get("min_history", defaults.get("min_history", 200)))
+    data_source = model_cfg.get("data_source", defaults.get("data_source", "auto"))
+    local_data_dir = model_cfg.get(
+        "local_data_dir",
+        defaults.get("local_data_dir", "data/historical"),
+    )
     total_timesteps = int(model_cfg.get("total_timesteps", defaults.get("total_timesteps", 200_000)))
     output_dir = Path(model_cfg.get("output_dir", defaults.get("output_dir", "backend/models")))
     model_filename = model_cfg.get("model_filename", f"{model_name}_model.zip")
@@ -106,7 +111,13 @@ def train_single_model(
 
     LOGGER.info("Preparing datasets for model '%s' (%s)...", model_name, ", ".join(tickers))
 
-    datasets, scaler = build_datasets(tickers, period=history_period, min_history=min_history)
+    datasets, scaler = build_datasets(
+        tickers,
+        period=history_period,
+        min_history=min_history,
+        source=data_source,
+        local_data_dir=local_data_dir,
+    )
 
     vec_env = create_envs(datasets)
 

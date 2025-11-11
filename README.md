@@ -112,6 +112,14 @@ hyperparameters, training horizon, or output paths.  Each model saves its
 trained weights and feature scaler into `backend/models/` by default, keeping
 them ready for the backend server to load.
 
+> 💡 **Training with your own CSV data**
+>
+> Place historical OHLCV files in `data/historical/` (either `TICKER.csv` or
+> `TICKER_YYYYMMDD.csv`).  Set `data_source: local` in
+> `backend/training/training_config.yaml` (either globally under `defaults` or
+> per-model) to force the trainer to use those files.  The default `auto`
+> setting will fall back to Yahoo Finance only when a local file is missing.
+
 ### 4. Get Alpaca API Keys
 
 1. Sign up at [Alpaca](https://alpaca.markets/)

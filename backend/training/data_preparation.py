@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-from backend.utils.utils_data_fetch import get_historical_data
-from backend.utils.utils_indicators import (
+from backend.utils.data_fetch import get_historical_data
+from backend.utils.indicators import (
     add_bollinger_bands,
     add_ema,
     add_macd,

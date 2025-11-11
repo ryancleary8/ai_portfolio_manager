@@ -15,10 +15,10 @@ from typing import Dict, List, Optional
 import pytz
 
 # Import custom modules (to be created)
-from utils.data_fetch import fetch_market_data, get_historical_data
-from utils.indicators import calculate_indicators
-from utils.trader import AlpacaTrader, prepare_observation
-from utils.logger import TradeLogger, PerformanceTracker
+from backend.utils.data_fetch import fetch_market_data, get_historical_data
+from backend.utils.indicators import calculate_indicators
+from backend.utils.trader import AlpacaTrader, prepare_observation
+from backend.utils.logger import TradeLogger, PerformanceTracker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

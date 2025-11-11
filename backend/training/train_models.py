@@ -5,10 +5,11 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Optional
 
 import joblib
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from .config_loader import load_training_config
@@ -16,6 +17,59 @@ from .data_preparation import TickerDataset, build_datasets
 from .envs import SingleStockTradingEnv
 
 LOGGER = logging.getLogger(__name__)
+
+
+class TrainingProgressCallback(BaseCallback):
+    """A simple textual progress bar for PPO training."""
+
+    def __init__(
+        self,
+        total_timesteps: int,
+        model_name: str,
+        bar_width: int = 40,
+        update_interval: Optional[int] = None,
+    ) -> None:
+        super().__init__()
+        self.total_timesteps = max(total_timesteps, 1)
+        self.model_name = model_name
+        self.bar_width = max(bar_width, 10)
+        computed_interval = max(self.total_timesteps // 100, 1)
+        if update_interval is None:
+            self.update_interval = computed_interval
+        else:
+            self.update_interval = max(update_interval, 1)
+        self._last_printed: int = 0
+
+    def _on_training_start(self) -> None:
+        print(f"\n🚀 Starting training for '{self.model_name}'")
+        self._print_progress(0)
+
+    def _on_step(self) -> bool:
+        if (
+            self.num_timesteps - self._last_printed >= self.update_interval
+            or self.num_timesteps >= self.total_timesteps
+        ):
+            self._last_printed = self.num_timesteps
+            self._print_progress(self.num_timesteps)
+        return True
+
+    def _on_training_end(self) -> None:
+        # Ensure the bar ends on a new line once training is complete.
+        self._print_progress(self.total_timesteps, final=True)
+        print(f"✅ Finished training for '{self.model_name}'\n")
+
+    def _print_progress(self, current_timesteps: int, *, final: bool = False) -> None:
+        progress = min(current_timesteps, self.total_timesteps)
+        fraction = progress / self.total_timesteps
+        filled = int(self.bar_width * fraction)
+        bar = "█" * filled + "-" * (self.bar_width - filled)
+        percent = fraction * 100
+        end = "\n" if final else "\r"
+        print(
+            f"[{bar}] {percent:6.2f}% ({progress}/{self.total_timesteps} steps)",
+            end=end,
+            flush=True,
+        )
 
 
 def configure_logging(verbose: bool = False) -> None:
@@ -58,8 +112,17 @@ def train_single_model(
 
     LOGGER.info("Training PPO agent for '%s' with %s timesteps", model_name, total_timesteps)
 
-    model = PPO("MlpPolicy", vec_env, verbose=1 if LOGGER.level <= logging.DEBUG else 0, **ppo_params)
-    model.learn(total_timesteps=total_timesteps)
+    model = PPO(
+        "MlpPolicy",
+        vec_env,
+        verbose=1 if LOGGER.level <= logging.DEBUG else 0,
+        **ppo_params,
+    )
+    progress_callback = TrainingProgressCallback(
+        total_timesteps=total_timesteps,
+        model_name=model_name,
+    )
+    model.learn(total_timesteps=total_timesteps, callback=progress_callback)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path = output_dir / model_filename

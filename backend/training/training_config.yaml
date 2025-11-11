@@ -12,17 +12,14 @@ defaults:
 
 models:
   tech:
-    tickers: [AAPL, MSFT, NVDA, GOOGL]
+    tickers: [AAPL, AVGO, NVDA, ORCL, MSFT]
     total_timesteps: 300000
     model_filename: tech_model.zip
     scaler_filename: tech_scaler.pkl
 
   energy:
-    tickers: [XOM, CVX, COP]
+    tickers: [XOM, CVX, MPC, PSX, FANG]
     history_period: "3y"
     model_filename: energy_model.zip
     scaler_filename: energy_scaler.pkl
 
-  finance:
-    tickers: [JPM, BAC, GS]
-    # inherits defaults

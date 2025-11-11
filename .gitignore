@@ -1,0 +1,72 @@
+# ---- OS junk ----
+.DS_Store
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.dist-info/
+.build/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.cache/
+
+# Virtual envs
+venv/
+env/
+.venv/
+
+# Env/config secrets
+.env
+.env.*        # e.g., .env.local, .env.production
+*.env
+
+# Logs & runtime
+*.log
+logs/
+*.pid
+
+# ---- Backend models & artifacts ----
+backend/models/*.zip
+backend/models/*.pkl
+# keep the folder structure
+!backend/models/.gitkeep
+
+# ---- Data ----
+data/historical/
+data/*.parquet
+data/*.feather
+data/*.npy
+data/*.npz
+data/*.sqlite
+# keep specific tracked files
+!data/trades.csv
+!data/performance.json
+# keep the folder structure
+!data/.gitkeep
+!data/historical/.gitkeep
+
+# ---- Node / React ----
+frontend/node_modules/
+frontend/.npm/
+frontend/.pnpm-store/
+frontend/.yarn/
+frontend/.parcel-cache/
+frontend/.next/
+frontend/dist/
+frontend/build/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-lock.yaml # if you prefer not to commit lockfiles; otherwise remove this
+
+# ---- Editors / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo

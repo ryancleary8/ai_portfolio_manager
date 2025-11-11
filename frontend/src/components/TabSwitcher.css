@@ -1,0 +1,29 @@
+.tab-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.65);
+  border-radius: 999px;
+  padding: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.tab-switcher__button {
+  border: none;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.8);
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.tab-switcher__button:hover {
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.tab-switcher__button.is-active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(14, 116, 144, 0.45));
+  color: #f8fafc;
+  box-shadow: 0 10px 25px rgba(14, 116, 144, 0.25);
+}

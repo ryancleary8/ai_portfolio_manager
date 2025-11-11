@@ -1,0 +1,91 @@
+.trades-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  backdrop-filter: blur(18px);
+}
+
+.trades-card__header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.trades-card__header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.trades-table__wrapper {
+  overflow-x: auto;
+}
+
+.trades-card table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.trades-card th,
+.trades-card td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  font-size: 0.95rem;
+}
+
+.trades-card th {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.8);
+  font-weight: 600;
+}
+
+.trades-card tbody tr:hover {
+  background: rgba(30, 41, 59, 0.45);
+}
+
+.trade-side {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.trade-side.is-buy {
+  background: rgba(52, 211, 153, 0.18);
+  color: var(--accent-secondary);
+}
+
+.trade-side.is-sell {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--danger);
+}
+
+.trade-side.is-hold {
+  background: rgba(148, 163, 184, 0.18);
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.trades-card td.is-right,
+.trades-card th.is-right {
+  text-align: right;
+}
+
+.trades-card td.is-positive {
+  color: var(--accent-secondary);
+}
+
+.trades-card td.is-negative {
+  color: var(--danger);
+}

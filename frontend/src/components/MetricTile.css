@@ -1,0 +1,45 @@
+.metric-tile {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  backdrop-filter: blur(14px);
+}
+
+.metric-tile__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.metric-tile__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.metric-tile__value {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.metric-tile__trend {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.metric-tile__trend.is-positive {
+  color: var(--accent-secondary);
+}
+
+.metric-tile__trend.is-negative {
+  color: var(--danger);
+}
+
+.metric-tile__sublabel {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.75);
+}

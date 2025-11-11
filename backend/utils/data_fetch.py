@@ -4,6 +4,7 @@ Retrieves historical and real-time data from Yahoo Finance and Alpaca.
 """
 
 import logging
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
@@ -66,13 +67,38 @@ def _normalise_ohlcv_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Return a copy of *df* with normalised column naming conventions."""
 
     normalised = df.copy()
-    normalised.columns = [col.lower() for col in normalised.columns]
+
+    def _clean_column_name(name: str) -> str:
+        """Return a snake_case version of *name* with known aliases mapped."""
+
+        cleaned = re.sub(r"[^0-9a-zA-Z]+", "_", name.strip().lower())
+        cleaned = re.sub(r"_+", "_", cleaned).strip("_")
+
+        alias_map = {
+            "adjclose": "adj_close",
+            "adj_close": "adj_close",
+            "adjusted_close": "adj_close",
+            "close_last": "close",
+            "close_price": "close",
+            "closing_price": "close",
+            "close_value": "close",
+        }
+
+        return alias_map.get(cleaned, cleaned)
+
+    normalised.columns = [_clean_column_name(col) for col in normalised.columns]
 
     # Harmonise the primary date column name if it exists under different aliases.
     if "date" not in normalised.columns:
         for candidate in ("datetime", "index", "timestamp"):
             if candidate in normalised.columns:
                 normalised = normalised.rename(columns={candidate: "date"})
+                break
+
+    if "close" not in normalised.columns:
+        for candidate in ("adj_close", "close_last", "close_price", "closing_price"):
+            if candidate in normalised.columns:
+                normalised["close"] = normalised[candidate]
                 break
 
     return normalised

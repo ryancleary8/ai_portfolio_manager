@@ -72,8 +72,7 @@ def download_ticker_history(
     if raw_df is None or raw_df.empty:
         return None
 
-    df = raw_df.rename(columns={col: col.lower() for col in raw_df.columns})
-    return df
+    return raw_df
 
 
 def build_feature_frame(df: pd.DataFrame) -> pd.DataFrame:

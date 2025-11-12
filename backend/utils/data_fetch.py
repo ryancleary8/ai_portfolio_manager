@@ -88,6 +88,25 @@ def _normalise_ohlcv_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     normalised.columns = [_clean_column_name(col) for col in normalised.columns]
 
+    # Ensure OHLCV columns are numeric even if stored as formatted strings.
+    numeric_columns = {
+        "open",
+        "high",
+        "low",
+        "close",
+        "adj_close",
+        "volume",
+    }
+    for column in numeric_columns.intersection(normalised.columns):
+        if not pd.api.types.is_numeric_dtype(normalised[column]):
+            cleaned = (
+                normalised[column]
+                .astype(str)
+                .str.replace(r"[^0-9.eE+-]", "", regex=True)
+                .replace({"": pd.NA})
+            )
+            normalised[column] = pd.to_numeric(cleaned, errors="coerce")
+
     # Harmonise the primary date column name if it exists under different aliases.
     if "date" not in normalised.columns:
         for candidate in ("datetime", "index", "timestamp"):
